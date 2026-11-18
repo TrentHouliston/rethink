@@ -57,6 +57,15 @@ const CMD_SMART_GRID_OFF = buf(
 const DELTA_SMART_GRID_OFF = buf('AA1810EC020403010102060001020403010100060001B1BB')
 const DELTA_SMART_GRID_SEASONAL = buf('AA1810EC020403010100060001020403010102060001B1BB')
 
+// Opening and closing each door in turn. 10A8 reports a compartment (01 fridge, 02 freezer),
+// not which of its two doors, and each event comes with a 10EC flipping the any-door-open byte.
+const FRIDGE_DOOR_OPEN = buf('AA0810A8010139BB')
+const FRIDGE_DOOR_CLOSED = buf('AA0810A801003EBB')
+const FREEZER_DOOR_OPEN = buf('AA0810A8020138BB')
+const FREEZER_DOOR_CLOSED = buf('AA0810A8020039BB')
+const DELTA_DOOR_OPEN = buf('AA1810EC020403010102060001020403010102060101B2BB')
+const DELTA_DOORS_CLOSED = buf('AA1810EC020403010102060101020403010102060001B2BB')
+
 function makeDevice() {
     const ha = new MockHAConnection()
     const thinq = new MockThinq2Device(DEVICE_ID, META)
@@ -185,6 +194,33 @@ describe(MODEL_ID, () => {
         thinq.resetRecorder()
         dev.setProperty('smart_grid', 'Not In Use')
         assert.equal(hex(thinq.outbox[0]), hex(CMD_SMART_GRID_OFF))
+    })
+
+    test('10A8 gives per-compartment door state', () => {
+        const { ha, thinq } = makeDevice()
+        const props = () => ha.devices[DEVICE_ID].properties
+
+        thinq.emit('data', FRIDGE_DOOR_OPEN)
+        thinq.emit('data', DELTA_DOOR_OPEN)
+        assert.equal(props().fridge_door, 'ON')
+        assert.equal(props().freezer_door, undefined, 'freezer untouched')
+        thinq.emit('data', FRIDGE_DOOR_CLOSED)
+        assert.equal(props().fridge_door, 'OFF')
+
+        thinq.emit('data', FREEZER_DOOR_OPEN)
+        assert.equal(props().freezer_door, 'ON')
+        thinq.emit('data', FREEZER_DOOR_CLOSED)
+        assert.equal(props().freezer_door, 'OFF')
+    })
+
+    test('a 10EC reporting every door closed resynchronises both compartments', () => {
+        const { ha, thinq } = makeDevice()
+        thinq.emit('data', FRIDGE_DOOR_OPEN)
+        thinq.emit('data', FREEZER_DOOR_OPEN)
+
+        thinq.emit('data', DELTA_DOORS_CLOSED)
+        assert.equal(ha.devices[DEVICE_ID].properties.fridge_door, 'OFF')
+        assert.equal(ha.devices[DEVICE_ID].properties.freezer_door, 'OFF')
     })
 
     test('setting acks, 1072 and 10AF frames are ignored without warnings', () => {

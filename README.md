@@ -40,7 +40,7 @@ the second one is the model it is sold as.
 | 2REFT1DIC4P_U   | GF-V700BSLC, InstaView Craft Ice French Door Refrigerator     | 🫤 preliminary support                                                                      |
 | 2REFTBDII4P_U   | GF-L500MBL                                                    | 🫤 preliminary support                                                                      |
 | 2REF11EII\_\_M2 | LMXS28626S, 4-Door French Door Refrigerator                   | 🫤 preliminary support                                                                      |
-| 2REF12EII_P_2   | (model name unknown), French Door Refrigerator with dispenser | 👍 setpoints, Express Freeze, fresh air filter, smart grid, filters                         |
+| 2REF12EII_P_2   | (model name unknown), French Door Refrigerator with dispenser | 👍 setpoints, Express Freeze, Pure N Fresh, smart grid, filters, doors                      |
 
 #### Washing machines
 
