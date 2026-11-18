@@ -12,6 +12,7 @@ import Dev_2REF11EIDG__4 from './devices/2REF11EIDG__4'
 import Dev_2REF11EBIVPC4 from './devices/2REF11EBIVPC4'
 import Dev_2REFTBDII4P_U from './devices/2REFTBDII4P_U'
 import Dev_2REF11EII__M2 from './devices/2REF11EII__M2'
+import Dev_2REF12EII_P_2 from './devices/2REF12EII_P_2'
 import Dev_2RES1VE61NFA2 from './devices/2RES1VE61NFA2'
 import Dev_2REB1GLVB1__2 from './devices/2REB1GLVB1__2'
 import Dev_2REBGLUB_2P__ from './devices/2REBGLUB_2P__'
@@ -80,6 +81,7 @@ const t2deviceTypes: Record<string, T2Factory> = {
     '2REF11EBIVPC4': Dev_2REF11EBIVPC4,
     '2REFTBDII4P_U': Dev_2REFTBDII4P_U,
     '2REF11EII__M2': Dev_2REF11EII__M2,
+    '2REF12EII_P_2': Dev_2REF12EII_P_2, // LG French door refrigerator with dispenser (AU)
     '2RES1VE61NFA2': Dev_2RES1VE61NFA2,
     '2REB1GLVB1__2': Dev_2REB1GLVB1__2,
     '2REBGLUB_2P__': Dev_2REBGLUB_2P__, // LG GBBSJ2CCEP bottom-freezer (EU), BK7234 modem
