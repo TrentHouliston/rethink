@@ -1,4 +1,5 @@
 import { Enum } from '@/util/enum'
+import { type ComponentInfo } from '../homeassistant'
 import { packStatus, type Status, type TemperatureUnit } from './fridge_common'
 import Dev_2REF11EII__M2, { FREEZER_F, FRIDGE_F, SETTING_LEN } from './2REF11EII__M2'
 
@@ -44,6 +45,15 @@ export default class Device extends Dev_2REF11EII__M2 {
 
     protected freshAirModes(): Enum<string> {
         return FRESH_AIR_MODES
+    }
+
+    // The names this model's LG app and model JSON use for these features.
+    protected components(unit: TemperatureUnit): Record<string, ComponentInfo> {
+        const components = super.components(unit)
+        components.express_freeze.name = 'Express Freeze'
+        components.fresh_air_filter.name = 'Pure N Fresh'
+        components.fresh_air_filter_replace.name = 'Pure N Fresh filter health'
+        return components
     }
 
     protected buildSetting(setting: Partial<Status>) {
