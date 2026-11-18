@@ -1,6 +1,6 @@
 import HADevice from './base'
 import { Device as Thinq2Device } from '../thinq2/device'
-import { DeviceDiscovery, type Connection } from '../homeassistant'
+import { DeviceDiscovery, type ComponentInfo, type Connection } from '../homeassistant'
 import { type Metadata } from '../thinq'
 import { allowExtendedType } from '@/util/casting'
 import AABBDevice from './aabb_device'
@@ -153,100 +153,100 @@ export default class Device extends AABBDevice {
         if (this.temperatureUnit === unit) return
 
         this.temperatureUnit = unit
+        this.setConfig({ ...this.deviceConfig, components: this.components(unit) })
+    }
+
+    // The entities offered to HA, which depend on the temperature unit.
+    protected components(unit: TemperatureUnit): Record<string, ComponentInfo> {
         const { fridge, freezer } = this.tables(unit)
-        this.setConfig(
-            allowExtendedType({
-                ...this.deviceConfig,
-                components: {
-                    fridge_setpoint: {
-                        platform: 'number',
-                        device_class: 'temperature',
-                        unique_id: '$deviceid-fridge_setpoint',
-                        state_topic: '$this/fridge_setpoint',
-                        command_topic: '$this/fridge_setpoint/set',
-                        name: 'Fridge temperature',
-                        ...range(fridge, unit),
-                    },
-                    freezer_setpoint: {
-                        platform: 'number',
-                        device_class: 'temperature',
-                        unique_id: '$deviceid-freezer_setpoint',
-                        state_topic: '$this/freezer_setpoint',
-                        command_topic: '$this/freezer_setpoint/set',
-                        name: 'Freezer temperature',
-                        ...range(freezer, unit),
-                    },
-                    express_freeze: {
-                        platform: 'switch',
-                        icon: 'mdi:snowflake',
-                        unique_id: '$deviceid-express_freeze',
-                        state_topic: '$this/express_freeze',
-                        command_topic: '$this/express_freeze/set',
-                        name: 'Ice Plus',
-                    },
-                    fresh_air_filter: {
-                        platform: 'select',
-                        icon: 'mdi:air-filter',
-                        unique_id: '$deviceid-fresh_air_filter',
-                        state_topic: '$this/fresh_air_filter',
-                        command_topic: '$this/fresh_air_filter/set',
-                        name: 'Fresh air filter mode',
-                        options: this.freshAirModes().options,
-                    },
-                    water_filter: {
-                        platform: 'binary_sensor',
-                        device_class: 'problem',
-                        entity_category: 'diagnostic',
-                        icon: 'mdi:water-opacity',
-                        unique_id: '$deviceid-water_filter',
-                        state_topic: '$this/water_filter',
-                        name: 'Water filter health',
-                    },
-                    water_filter_months: {
-                        platform: 'sensor',
-                        entity_category: 'diagnostic',
-                        unique_id: '$deviceid-water_filter_months',
-                        state_topic: '$this/water_filter_months',
-                        name: 'Water filter months',
-                        icon: 'mdi:calendar-clock',
-                        unit_of_measurement: 'months',
-                        suggested_display_precision: 0,
-                    },
-                    fresh_air_filter_replace: {
-                        platform: 'binary_sensor',
-                        device_class: 'problem',
-                        entity_category: 'diagnostic',
-                        icon: 'mdi:air-filter',
-                        unique_id: '$deviceid-fresh_air_filter_replace',
-                        state_topic: '$this/fresh_air_filter_replace',
-                        name: 'Fresh air filter health',
-                    },
-                    smart_grid: {
-                        platform: 'select',
-                        icon: 'mdi:transmission-tower',
-                        unique_id: '$deviceid-smart_grid',
-                        state_topic: '$this/smart_grid',
-                        command_topic: '$this/smart_grid/set',
-                        name: 'Smart Grid',
-                        options: SMART_GRID_OPTIONS.options,
-                    },
-                    fridge_door: {
-                        platform: 'binary_sensor',
-                        device_class: 'door',
-                        unique_id: '$deviceid-fridge_door',
-                        state_topic: '$this/fridge_door',
-                        name: 'Fridge door',
-                    },
-                    freezer_door: {
-                        platform: 'binary_sensor',
-                        device_class: 'door',
-                        unique_id: '$deviceid-freezer_door',
-                        state_topic: '$this/freezer_door',
-                        name: 'Freezer door',
-                    },
-                },
-            }),
-        )
+        return allowExtendedType({
+            fridge_setpoint: {
+                platform: 'number',
+                device_class: 'temperature',
+                unique_id: '$deviceid-fridge_setpoint',
+                state_topic: '$this/fridge_setpoint',
+                command_topic: '$this/fridge_setpoint/set',
+                name: 'Fridge temperature',
+                ...range(fridge, unit),
+            },
+            freezer_setpoint: {
+                platform: 'number',
+                device_class: 'temperature',
+                unique_id: '$deviceid-freezer_setpoint',
+                state_topic: '$this/freezer_setpoint',
+                command_topic: '$this/freezer_setpoint/set',
+                name: 'Freezer temperature',
+                ...range(freezer, unit),
+            },
+            express_freeze: {
+                platform: 'switch',
+                icon: 'mdi:snowflake',
+                unique_id: '$deviceid-express_freeze',
+                state_topic: '$this/express_freeze',
+                command_topic: '$this/express_freeze/set',
+                name: 'Ice Plus',
+            },
+            fresh_air_filter: {
+                platform: 'select',
+                icon: 'mdi:air-filter',
+                unique_id: '$deviceid-fresh_air_filter',
+                state_topic: '$this/fresh_air_filter',
+                command_topic: '$this/fresh_air_filter/set',
+                name: 'Fresh air filter mode',
+                options: this.freshAirModes().options,
+            },
+            water_filter: {
+                platform: 'binary_sensor',
+                device_class: 'problem',
+                entity_category: 'diagnostic',
+                icon: 'mdi:water-opacity',
+                unique_id: '$deviceid-water_filter',
+                state_topic: '$this/water_filter',
+                name: 'Water filter health',
+            },
+            water_filter_months: {
+                platform: 'sensor',
+                entity_category: 'diagnostic',
+                unique_id: '$deviceid-water_filter_months',
+                state_topic: '$this/water_filter_months',
+                name: 'Water filter months',
+                icon: 'mdi:calendar-clock',
+                unit_of_measurement: 'months',
+                suggested_display_precision: 0,
+            },
+            fresh_air_filter_replace: {
+                platform: 'binary_sensor',
+                device_class: 'problem',
+                entity_category: 'diagnostic',
+                icon: 'mdi:air-filter',
+                unique_id: '$deviceid-fresh_air_filter_replace',
+                state_topic: '$this/fresh_air_filter_replace',
+                name: 'Fresh air filter health',
+            },
+            smart_grid: {
+                platform: 'select',
+                icon: 'mdi:transmission-tower',
+                unique_id: '$deviceid-smart_grid',
+                state_topic: '$this/smart_grid',
+                command_topic: '$this/smart_grid/set',
+                name: 'Smart Grid',
+                options: SMART_GRID_OPTIONS.options,
+            },
+            fridge_door: {
+                platform: 'binary_sensor',
+                device_class: 'door',
+                unique_id: '$deviceid-fridge_door',
+                state_topic: '$this/fridge_door',
+                name: 'Fridge door',
+            },
+            freezer_door: {
+                platform: 'binary_sensor',
+                device_class: 'door',
+                unique_id: '$deviceid-freezer_door',
+                state_topic: '$this/freezer_door',
+                name: 'Freezer door',
+            },
+        })
     }
 
     processAABB(buf: Buffer) {
