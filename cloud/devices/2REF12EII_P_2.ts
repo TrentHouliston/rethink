@@ -3,7 +3,7 @@ import { type ComponentInfo } from '../homeassistant'
 import { packStatus, type Status, type TemperatureUnit } from './fridge_common'
 import Dev_2REF11EII__M2, { FREEZER_F, FRIDGE_F, SETTING_LEN } from './2REF11EII__M2'
 
-// 2REF12EII_P_2 - LG French door refrigerator with dispenser, sold in Australia
+// 2REF12EII_P_2 - LG GF-L570PL French door refrigerator with ice and water dispenser (AU)
 // (model JSON: "T20_Next8 Dispenser AU Wi-Fi", deviceType 101, QCA4010 modem).
 //
 // Same 9-byte status block, 10EB/10EC/10A8 frames and F017 settings as 2REF11EII__M2.
