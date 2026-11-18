@@ -107,6 +107,16 @@ describe(MODEL_ID, () => {
         assert.deepEqual(c.fresh_air_filter.options, ['Off', 'Auto', 'Power'])
     })
 
+    test("entities use this model's LG names", () => {
+        const { ha, thinq } = makeDevice()
+        thinq.emit('data', SAMPLE_INITIAL)
+
+        const c = components(ha)
+        assert.equal(c.express_freeze.name, 'Express Freeze')
+        assert.equal(c.fresh_air_filter.name, 'Pure N Fresh')
+        assert.equal(c.fresh_air_filter_replace.name, 'Pure N Fresh filter health')
+    })
+
     test('setpoint changes read back through 10EC', () => {
         const { ha, thinq } = makeDevice()
         thinq.emit('data', DELTA_FRIDGE_2C)
