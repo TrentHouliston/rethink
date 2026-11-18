@@ -34,7 +34,7 @@ import { Enum } from '@/util/enum'
 // * 1072: Unknown.
 
 const STATUS_LEN = 9
-const SETTING_LEN = 41
+export const SETTING_LEN = 41
 
 // Express mode (called "ice plus" on this model)
 const EXPRESS_ON = 2
@@ -63,7 +63,7 @@ const SMART_GRID_OPTIONS = Enum.of({
 const DOOR_COMPARTMENTS: Record<number, string> = { 1: 'fridge_door', 2: 'freezer_door' }
 
 // Per model.json, a custom map is used.
-const FRIDGE_F = new Map([
+export const FRIDGE_F = new Map([
     [1, 46],
     [2, 45],
     [3, 44],
@@ -79,7 +79,7 @@ const FRIDGE_F = new Map([
     [13, 34],
     [14, 33],
 ])
-const FREEZER_F = new Map([
+export const FREEZER_F = new Map([
     [1, 8],
     [2, 6],
     [3, 5],
@@ -140,8 +140,13 @@ export default class Device extends AABBDevice {
         this.send(Buffer.from('F0ED1211010000010400', 'hex'))
     }
 
-    private tables(unit: TemperatureUnit) {
+    protected tables(unit: TemperatureUnit) {
         return unit === 'F' ? { fridge: FRIDGE_F, freezer: FREEZER_F } : { fridge: FRIDGE_C, freezer: FREEZER_C }
+    }
+
+    // The fresh air filter modes HA can select. Replace is reported separately, as a problem.
+    protected freshAirModes(): Enum<string> {
+        return FRESH_AIR_MODES
     }
 
     setTemperatureUnit(unit: TemperatureUnit) {
@@ -186,7 +191,7 @@ export default class Device extends AABBDevice {
                         state_topic: '$this/fresh_air_filter',
                         command_topic: '$this/fresh_air_filter/set',
                         name: 'Fresh air filter mode',
-                        options: FRESH_AIR_MODES.options,
+                        options: this.freshAirModes().options,
                     },
                     water_filter: {
                         platform: 'binary_sensor',
@@ -277,7 +282,7 @@ export default class Device extends AABBDevice {
         this.publishProperty('freezer_setpoint', freezer.get(status.freezerSetpoint))
         this.publishProperty('express_freeze', status.expressFreeze === EXPRESS_ON ? 'ON' : 'OFF')
 
-        const freshAirMode = FRESH_AIR_MODES.map(status.freshAirFilter)
+        const freshAirMode = this.freshAirModes().map(status.freshAirFilter)
         if (freshAirMode !== undefined) this.publishProperty('fresh_air_filter', freshAirMode)
         this.publishProperty('fresh_air_filter_replace', status.freshAirFilter === FRESH_AIR_REPLACE ? 'ON' : 'OFF')
 
@@ -316,7 +321,7 @@ export default class Device extends AABBDevice {
             else setting.freezerSetpoint = raw
             setting.tempUnit = unit === 'C' ? 1 : 0
         } else if (prop === 'fresh_air_filter') {
-            const code = FRESH_AIR_MODES.unmap(mqttValue)
+            const code = this.freshAirModes().unmap(mqttValue)
             if (code === undefined) {
                 this.log(`${prop}: cannot be set to ${mqttValue}`)
                 return
@@ -341,7 +346,7 @@ export default class Device extends AABBDevice {
 
     // packet captures showed 0x00 in a few setting commands instead of 0xFF, so we'll preserve those. these fields don't seem to do
     // anything on this unit, so they're probably safe?
-    private buildSetting(setting: Partial<Status>) {
+    protected buildSetting(setting: Partial<Status>) {
         const body = packStatus(
             { dispenserMode: 0, dispenserCapacity: 0, dispenserUnit: 0, monDataNumber: 0, ...setting },
             SETTING_LEN,
